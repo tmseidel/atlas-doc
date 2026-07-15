@@ -1,9 +1,14 @@
 package com.mdeg.docsportal.controller;
 
+import com.mdeg.docsportal.model.entity.BuildRecord;
+import com.mdeg.docsportal.model.entity.BuildStatus;
+import com.mdeg.docsportal.model.entity.BuildTrigger;
 import com.mdeg.docsportal.model.entity.RepositoryConfig;
 import com.mdeg.docsportal.model.entity.SyncStatus;
+import com.mdeg.docsportal.repository.BuildRecordJpaRepository;
 import com.mdeg.docsportal.repository.RepositoryConfigJpaRepository;
 import com.mdeg.docsportal.service.ProjectService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,10 +33,19 @@ class ApiHealthControllerIntegrationTest {
     private RepositoryConfigJpaRepository repoDao;
 
     @Autowired
+    private BuildRecordJpaRepository buildRecordRepo;
+
+    @Autowired
     private ProjectService projectService;
 
     private MockMvc mockMvc() {
         return webAppContextSetup(context).build();
+    }
+
+    @AfterEach
+    void cleanup() {
+        buildRecordRepo.deleteAll();
+        repoDao.deleteAll();
     }
 
     @Test
@@ -84,5 +98,22 @@ class ApiHealthControllerIntegrationTest {
         mockMvc().perform(get("/api/build/history"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void buildHistory_shouldNotSerializeLazyProjectAssociation() throws Exception {
+        BuildRecord record = buildRecordRepo.save(BuildRecord.builder()
+            .project(projectService.getDefaultProject())
+            .status(BuildStatus.SUCCESS)
+            .startedAt(Instant.parse("2100-01-01T00:00:00Z"))
+            .finishedAt(Instant.parse("2100-01-01T00:00:01Z"))
+            .trigger(BuildTrigger.MANUAL)
+            .build());
+
+        mockMvc().perform(get("/api/build/history"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(record.getId()))
+            .andExpect(jsonPath("$[0].project").doesNotExist())
+            .andExpect(jsonPath("$[0].status").value("SUCCESS"));
     }
 }

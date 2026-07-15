@@ -1,6 +1,6 @@
 package com.mdeg.docsportal.controller;
 
-import com.mdeg.docsportal.model.entity.BuildRecord;
+import com.mdeg.docsportal.dto.BuildRecordDto;
 import com.mdeg.docsportal.model.entity.BuildStatus;
 import com.mdeg.docsportal.repository.BuildRecordJpaRepository;
 import com.mdeg.docsportal.service.BuildOrchestrator;
@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/build")
@@ -40,7 +42,12 @@ public class AdminBuildController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<java.util.List<BuildRecord>> getHistory() {
-        return ResponseEntity.ok(buildRecordRepo.findTop20ByProjectIdOrderByStartedAtDesc(projectContext.getProjectId()));
+    public ResponseEntity<List<BuildRecordDto>> getHistory() {
+        List<BuildRecordDto> history = buildRecordRepo
+            .findTop20ByProjectIdOrderByStartedAtDesc(projectContext.getProjectId())
+            .stream()
+            .map(BuildRecordDto::from)
+            .toList();
+        return ResponseEntity.ok(history);
     }
 }
