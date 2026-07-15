@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}" lang="en">
+<title>Docs — Docs Portal</title>
+<main>
+    <!-- Rebuilding banner -->
+    <div id="rebuilding-banner" class="alert alert-warning rounded-0 border-0 mb-0 d-none" role="status">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-arrow-repeat fs-5 spinner-border-sm"></i>
+            <strong>Rebuilding:</strong>
+            <span>Documentation is being rebuilt. Please wait...</span>
+        </div>
+    </div>
+
+    <!-- MkDocs owns all documentation navigation inside this iframe. -->
+    <div class="position-relative bg-white" style="height: calc(100vh - 56px);">
+        <iframe id="docs-iframe" name="docs-iframe"
+                th:src="@{/site/}"
+                class="w-100 h-100 border-0"
+                title="Documentation">
+        </iframe>
+        <div id="rebuilding-overlay" class="d-none position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 align-items-center justify-content-center" aria-live="assertive">
+            <div class="text-center">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <p class="fw-semibold mb-0">Documentation is being rebuilt.</p>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/polling.js}"></script>
+</main>
+</html>

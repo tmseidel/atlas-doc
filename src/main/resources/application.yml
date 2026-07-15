@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: docs-portal
+  datasource:
+    url: jdbc:h2:file:./data/docs-portal
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+docs-portal:
+  auth:
+    admin:
+      username: ${DOCS_PORTAL_AUTH_ADMIN_USERNAME:admin}
+      password: ${DOCS_PORTAL_AUTH_ADMIN_PASSWORD:admin}
+    viewer:
+      username: ${DOCS_PORTAL_AUTH_VIEWER_USERNAME:viewer}
+      password: ${DOCS_PORTAL_AUTH_VIEWER_PASSWORD:viewer}
+  security:
+    max-failed-attempts: 10
+    block-duration-minutes: 15
+  webhook:
+    secret: ${GITEA_WEBHOOK_SECRET:webhook-secret-change-me}
+  public-base-url: ${DOCS_PORTAL_PUBLIC_BASE_URL:}
+  workspace-dir: ${DOCS_PORTAL_WORKSPACE_DIR:./workspace}
+  mkdocs-config-dir: ${DOCS_PORTAL_MKDOCS_CONFIG_DIR:./mkdocs-config}
+  mkdocs-working-dir: ${DOCS_PORTAL_MKDOCS_WORKING_DIR:./mkdocs-working}
+  site-dir: ${DOCS_PORTAL_SITE_DIR:./site}
+  mkdocs-command: ${DOCS_PORTAL_MKDOCS_COMMAND:mkdocs}
+  poll-interval-ms: ${DOCS_PORTAL_POLL_INTERVAL_MS:300000}
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.mdeg.docsportal: DEBUG
+    org.eclipse.jgit: WARN

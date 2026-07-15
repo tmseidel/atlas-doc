@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}" lang="en">
+<title>Build — Docs Portal</title>
+<main>
+    <div class="container py-4">
+        <div class="row g-4">
+            <!-- Build Controls -->
+            <div class="col-lg-6">
+                <h4 class="fw-bold mb-3"><i class="bi bi-hammer me-2"></i>Build Management</h4>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <!-- Status & Trigger -->
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <button class="btn btn-primary" onclick="triggerBuild()" id="trigger-btn">
+                                <i class="bi bi-lightning-charge me-1"></i> Trigger Build
+                            </button>
+                            <span id="build-status" class="badge bg-secondary fs-6 px-3 py-2">
+                                <i class="bi bi-hourglass-split me-1"></i> Loading...
+                            </span>
+                        </div>
+
+                        <!-- Build Log -->
+                        <h6 class="fw-semibold mb-2"><i class="bi bi-terminal me-1"></i> Build Log</h6>
+                        <pre id="build-log" class="bg-dark text-light p-3 rounded-2 mb-0"
+                             style="max-height: 300px; overflow-y: auto; font-size: 0.8rem; font-family: 'Courier New', monospace;">No build log available.</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Build History -->
+            <div class="col-lg-6">
+                <h4 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Build History</h4>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="build-history">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Started</th>
+                                        <th>Duration</th>
+                                        <th class="text-center">Status</th>
+                                        <th>Trigger</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="4" class="text-center text-muted py-4">
+                                        <i class="bi bi-arrow-clockwise"></i> Loading...
+                                    </td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function loadStatus() {
+        const resp = await fetch('/api/build/status');
+        if (resp.ok) {
+            const status = await resp.json();
+            const badge = document.getElementById('build-status');
+            const btn = document.getElementById('trigger-btn');
+            const config = {
+                RUNNING:    { bg: 'warning',  icon: '<i class="bi bi-arrow-repeat spin me-1"></i>' },
+                SUCCESS:    { bg: 'success',  icon: '<i class="bi bi-check-circle me-1"></i>' },
+                FAILED:     { bg: 'danger',   icon: '<i class="bi bi-x-circle me-1"></i>' },
+            };
+            const c = config[status] || { bg: 'secondary', icon: '<i class="bi bi-dash-circle me-1"></i>' };
+            badge.className = 'badge bg-' + c.bg + ' fs-6 px-3 py-2';
+            badge.innerHTML = c.icon + status;
+            btn.disabled = status === 'RUNNING';
+            btn.innerHTML = status === 'RUNNING'
+                ? '<i class="bi bi-arrow-repeat spin me-1"></i> Building...'
+                : '<i class="bi bi-lightning-charge me-1"></i> Trigger Build';
+        }
+    }
+
+    async function loadLog() {
+        const resp = await fetch('/api/build/log');
+        if (resp.ok) {
+            const log = await resp.text();
+            const el = document.getElementById('build-log');
+            el.textContent = log || 'No build log available.';
+            el.scrollTop = el.scrollHeight;
+        }
+    }
+
+    async function loadHistory() {
+        const resp = await fetch('/api/build/history');
+        if (resp.ok) {
+            const records = await resp.json();
+            const tbody = document.querySelector('#build-history tbody');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox fs-1 d-block mb-2"></i>No build history.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = records.map(r => {
+                const dur = r.startedAt && r.finishedAt
+                    ? formatDuration(new Date(r.startedAt), new Date(r.finishedAt))
+                    : '—';
+                const statusClass = r.status === 'SUCCESS' ? 'success-subtle text-success' :
+                                    r.status === 'FAILED'  ? 'danger-subtle text-danger'  :
+                                    r.status === 'RUNNING' ? 'warning-subtle text-warning' : 'secondary-subtle text-secondary';
+                const statusIcon = r.status === 'SUCCESS' ? 'bi-check-circle' :
+                                   r.status === 'FAILED'  ? 'bi-x-circle' :
+                                   r.status === 'RUNNING' ? 'bi-arrow-repeat spin' : 'bi-dash-circle';
+                return `<tr>
+                    <td class="ps-4"><small>${new Date(r.startedAt).toLocaleString()}</small></td>
+                    <td><small>${dur}</small></td>
+                    <td class="text-center"><span class="badge bg-${statusClass}"><i class="bi ${statusIcon} me-1"></i>${r.status}</span></td>
+                    <td><span class="badge bg-light text-dark border">${triggerLabel(r.trigger)}</span></td>
+                </tr>`;
+            }).join('');
+        }
+    }
+
+    function formatDuration(start, end) {
+        const secs = Math.round((end - start) / 1000);
+        if (secs < 60) return secs + 's';
+        return Math.floor(secs / 60) + 'm ' + (secs % 60) + 's';
+    }
+
+    function triggerLabel(t) {
+        const icons = { WEBHOOK: '<i class="bi bi-webhook"></i>', MANUAL: '<i class="bi bi-hand-index"></i>', POLLING: '<i class="bi bi-arrow-repeat"></i>' };
+        return (icons[t] || '') + ' ' + (t || '—').toLowerCase();
+    }
+
+    async function triggerBuild() {
+        const btn = document.getElementById('trigger-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i> Building...';
+        try {
+            const resp = await fetch('/api/build/trigger', {method: 'POST'});
+            if (!resp.ok) {
+                throw new Error(await resp.text());
+            }
+            // The build runs asynchronously; refresh immediately and keep polling
+            // so its queued, running, and finished states are all visible.
+            await refreshBuildState();
+            setTimeout(refreshBuildState, 250);
+        } catch (error) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i> Trigger Build';
+            alert('Could not trigger build: ' + (error.message || 'unknown error'));
+        }
+    }
+
+    async function refreshBuildState() {
+        await Promise.all([loadStatus(), loadLog(), loadHistory()]);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshBuildState();
+        setInterval(refreshBuildState, 3000);
+    });
+    </script>
+</main>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs Portal — Login</title>
+    <link th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css}" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-sm-8 col-md-6 col-lg-4">
+                <!-- Card -->
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-body p-5">
+                        <!-- Brand -->
+                        <div class="text-center mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mb-3" style="width:64px;height:64px;">
+                                <i class="bi bi-journal-bookmark-fill text-primary fs-2"></i>
+                            </div>
+                            <h4 class="fw-bold mb-1">Docs Portal</h4>
+                            <p class="text-muted small mb-0">Sign in to continue</p>
+                        </div>
+
+                        <!-- Alerts -->
+                        <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center gap-2 py-2" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>Invalid username or password.</span>
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-success d-flex align-items-center gap-2 py-2" role="alert">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>You have been logged out.</span>
+                        </div>
+                        <div th:if="${param.projectError}" class="alert alert-danger py-2" role="alert">
+                            Select a valid project and sign in again.
+                        </div>
+
+                        <!-- Login form -->
+                        <form th:action="@{/login}" method="post">
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-medium">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" id="username" name="username" required autofocus
+                                           placeholder="Enter username" autocomplete="username">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-medium">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" required
+                                           placeholder="Enter password" autocomplete="current-password">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="projectId" class="form-label fw-medium">Project</label>
+                                <select class="form-select" id="projectId" name="projectId" required>
+                                    <option th:each="project : ${projects}"
+                                            th:value="${project.id}"
+                                            th:selected="${project.id == defaultProjectId}"
+                                            th:text="${project.name}">Default Project</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <p class="text-center text-muted small mt-3">&copy; 2026 Docs Portal</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

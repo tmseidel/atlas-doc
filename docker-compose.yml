@@ -1,0 +1,19 @@
+services:
+  docs-portal:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./workspace:/app/workspace
+      - ./mkdocs-config:/app/mkdocs-config
+      - ./site:/app/site
+      - ./data:/app/data
+    environment:
+      - DOCS_PORTAL_AUTH_ADMIN_USERNAME
+      - DOCS_PORTAL_AUTH_ADMIN_PASSWORD
+      - DOCS_PORTAL_AUTH_VIEWER_USERNAME
+      - DOCS_PORTAL_AUTH_VIEWER_PASSWORD
+      - GITEA_WEBHOOK_SECRET
+      - DOCS_PORTAL_PUBLIC_BASE_URL
+      - DOCS_PORTAL_MKDOCS_COMMAND=mkdocs
+    restart: unless-stopped

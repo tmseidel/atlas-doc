@@ -1,0 +1,46 @@
+/* ── Docs Portal — Bootstrap-enhanced Styles ── */
+
+/* Navbar */
+.navbar .nav-link { opacity: 0.85; transition: opacity 0.15s; }
+.navbar .nav-link:hover,
+.navbar .nav-link.active { opacity: 1; }
+
+/* Page list sidebar */
+#page-list .list-group-item {
+    border: none;
+    font-size: 0.85rem;
+    transition: background-color 0.1s;
+}
+#page-list .list-group-item:hover {
+    background-color: #e9ecef;
+}
+
+/* Build log */
+pre#build-log {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Badge spin animation for RUNNING status */
+.spin {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* Table readability */
+table code {
+    font-size: 0.8rem;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Smooth transitions on all interactive elements */
+.btn, .list-group-item, .nav-link {
+    transition: all 0.15s ease;
+}

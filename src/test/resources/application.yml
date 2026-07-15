@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show-sql: false
+  flyway:
+    enabled: false
+
+docs-portal:
+  auth:
+    admin:
+      username: admin
+      password: admin
+    viewer:
+      username: viewer
+      password: viewer
+  webhook:
+    secret: test-webhook-secret
+  workspace-dir: /tmp/docs-portal-test/workspace
+  mkdocs-config-dir: /tmp/docs-portal-test/mkdocs-config
+  mkdocs-working-dir: /tmp/docs-portal-test/mkdocs-working
+  site-dir: /tmp/docs-portal-test/site
+  mkdocs-command: mkdocs
+  poll-interval-ms: 300000
+
+server:
+  port: 0
+
+logging:
+  level:
+    com.mdeg.docsportal: WARN
+    org.eclipse.jgit: ERROR

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${title}">Docs Portal</title>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <link th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css}" rel="stylesheet">
+    <link th:href="@{/css/docs-portal.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- ── Navbar ── -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/docs}">
+                <i class="bi bi-journal-bookmark-fill"></i>
+                <span class="fw-semibold">Docs Portal</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto gap-1">
+                    <li class="nav-item d-flex align-items-center px-2 text-white-50 small">
+                        <i class="bi bi-folder2-open me-1"></i><span th:text="${activeProject}">Project</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1"
+                           th:href="@{/docs}"
+                           th:classappend="${currentPage == 'docs'} ? 'active fw-semibold' : ''">
+                            <i class="bi bi-book"></i> Documentation
+                        </a>
+                    </li>
+                    <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1"
+                           th:href="@{/admin/projects}"
+                           th:classappend="${currentPage == 'projects'} ? 'active fw-semibold' : ''">
+                            <i class="bi bi-collection"></i> Projects
+                        </a>
+                    </li>
+                    <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1"
+                           th:href="@{/admin/repos}"
+                           th:classappend="${currentPage == 'repos'} ? 'active fw-semibold' : ''">
+                            <i class="bi bi-hdd-stack"></i> Repositories
+                        </a>
+                    </li>
+                    <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1"
+                           th:href="@{/admin/mkdocs-config}"
+                           th:classappend="${currentPage == 'mkdocs-config'} ? 'active fw-semibold' : ''">
+                            <i class="bi bi-gear"></i> MkDocs Config
+                        </a>
+                    </li>
+                    <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}" class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1"
+                           th:href="@{/admin/build}"
+                           th:classappend="${currentPage == 'build'} ? 'active fw-semibold' : ''">
+                            <i class="bi bi-hammer"></i> Build
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Page Content ── -->
+    <div th:replace="${content}"></div>
+
+    <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+    <script>
+    // Add Spring Security's CSRF token to same-origin state-changing API calls.
+    (function () {
+        const token = document.querySelector('meta[name="_csrf"]')?.content;
+        const headerName = document.querySelector('meta[name="_csrf_header"]')?.content;
+        if (!token || !headerName) return;
+
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = function (resource, options = {}) {
+            const method = (options.method || 'GET').toUpperCase();
+            if (!['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
+                const headers = new Headers(options.headers || {});
+                headers.set(headerName, token);
+                options = {...options, headers};
+            }
+            return originalFetch(resource, options);
+        };
+    }());
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::title}, ~{::main})}" lang="en">
+<title>Projects — Docs Portal</title>
+<main>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1"><i class="bi bi-collection me-2"></i>Projects</h4>
+                <p class="text-muted mb-0">Repositories, MkDocs configuration, build history, and generated documentation are isolated per project.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openCreate()"><i class="bi bi-plus-lg me-1"></i> New Project</button>
+        </div>
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light"><tr><th class="ps-4">Name</th><th>Description</th><th class="text-end pe-4">Actions</th></tr></thead>
+                    <tbody id="project-list"><tr><td colspan="3" class="text-center text-muted py-4">Loading projects…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="project-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="project-modal-title">New Project</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="project-id">
+                <div class="mb-3"><label class="form-label" for="project-name">Name</label><input class="form-control" id="project-name" required></div>
+                <div><label class="form-label" for="project-description">Description</label><textarea class="form-control" id="project-description" rows="3"></textarea></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" onclick="saveProject()">Save</button></div>
+        </div></div>
+    </div>
+
+    <script>
+    let projects = [];
+    const modal = () => new bootstrap.Modal(document.getElementById('project-modal'));
+    const esc = value => { const element = document.createElement('div'); element.textContent = value || ''; return element.innerHTML; };
+
+    async function loadProjects() {
+        const response = await fetch('/api/projects');
+        projects = await response.json();
+        document.getElementById('project-list').innerHTML = projects.map(project => `<tr>
+            <td class="ps-4 fw-semibold">${esc(project.name)}</td><td>${esc(project.description) || '<span class="text-muted">—</span>'}</td>
+            <td class="text-end pe-4"><div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary" onclick="selectProject('${project.id}')">Open</button>
+                <button class="btn btn-outline-secondary" onclick="openEdit('${project.id}')"><i class="bi bi-pencil"></i></button>
+            </div></td></tr>`).join('');
+    }
+    function openCreate() {
+        document.getElementById('project-id').value = '';
+        document.getElementById('project-name').value = '';
+        document.getElementById('project-description').value = '';
+        document.getElementById('project-modal-title').textContent = 'New Project'; modal().show();
+    }
+    function openEdit(id) {
+        const project = projects.find(item => item.id === id); if (!project) return;
+        document.getElementById('project-id').value = project.id;
+        document.getElementById('project-name').value = project.name;
+        document.getElementById('project-description').value = project.description || '';
+        document.getElementById('project-modal-title').textContent = 'Edit Project'; modal().show();
+    }
+    async function saveProject() {
+        const id = document.getElementById('project-id').value;
+        const response = await fetch(id ? `/api/projects/${id}` : '/api/projects', {
+            method: id ? 'PUT' : 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: document.getElementById('project-name').value, description: document.getElementById('project-description').value})
+        });
+        if (!response.ok) return alert('Could not save project.');
+        bootstrap.Modal.getInstance(document.getElementById('project-modal')).hide(); loadProjects();
+    }
+    async function selectProject(id) {
+        const response = await fetch(`/api/projects/context/${id}`, {method: 'POST'});
+        if (response.ok) window.location.assign('/docs');
+    }
+    document.addEventListener('DOMContentLoaded', loadProjects);
+    </script>
+</main>
+</html>
