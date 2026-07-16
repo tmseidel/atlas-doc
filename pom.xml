@@ -12,9 +12,9 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.mdeg</groupId>
+    <groupId>org.remus</groupId>
     <artifactId>docs-portal</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>docs-portal</name>
     <description>Aggregates Markdown documents from Gitea repos and serves them via MkDocs</description>
 

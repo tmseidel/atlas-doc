@@ -85,7 +85,7 @@ ID below each root.
 docs-portal/
 ├── pom.xml
 ├── Dockerfile
-├── src/main/java/com/mdeg/docsportal/
+├── src/main/java/org/remus/docsportal/
 │   ├── DocsPortalApplication.java       # @SpringBootApplication + @EnableScheduling
 │   ├── config/
 │   │   ├── SecurityConfig.java          # Spring Security: session auth, CSRF

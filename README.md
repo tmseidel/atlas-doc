@@ -31,6 +31,36 @@ their preferred Git hosting service.
 - Shows build status, logs, and the most recent 20 build records in the Admin
   UI.
 
+## Screenshots
+
+### Unified documentation
+
+The authenticated documentation view embeds the generated MkDocs Material
+site, including its navigation, search, and table of contents.
+
+![Rendered documentation in the Docs Portal](docs/screenshots/atlas-doc-main-screen-rendered-markdown.png)
+
+### Repository and webhook configuration
+
+Configure the repositories that provide documentation and copy the displayed
+webhook URL and secret to trigger builds on push.
+
+![Repository configuration and webhook details](docs/screenshots/atlas-doc-repository-configuration.png)
+
+### MkDocs configuration repository
+
+Use a dedicated Git repository for `mkdocs.yml`, shared pages, custom CSS, and
+theme overrides.
+
+![MkDocs configuration repository form](docs/screenshots/atlas-doc-mk-docs-repository-configuration.png)
+
+### Build management
+
+Trigger builds manually, inspect the current build output, and review recent
+build history in one place.
+
+![Build management page with build log and history](docs/screenshots/atlas-doc-build-management.png)
+
 ## Architecture
 
 ```mermaid
