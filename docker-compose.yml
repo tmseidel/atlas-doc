@@ -4,9 +4,9 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /tmp/workspace:/app/workspace
-      - /tmp/mkdocs-config:/app/mkdocs-config
-      - /tmp/site:/app/site
+      - ./workspace:/app/workspace
+      - ./mkdocs-config:/app/mkdocs-config
+      - ./site:/app/site
       - ./data:/app/data
     environment:
       - DOCS_PORTAL_AUTH_ADMIN_USERNAME
