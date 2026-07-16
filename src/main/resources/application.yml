@@ -45,5 +45,5 @@ server:
 
 logging:
   level:
-    com.mdeg.docsportal: DEBUG
+    org.remus.docsportal: DEBUG
     org.eclipse.jgit: WARN
